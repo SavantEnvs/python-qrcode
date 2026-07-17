@@ -1,0 +1,17 @@
+# Mayhem target: python-qrcode QR code generator (Atheris/libFuzzer harness).
+# The cmd binary is the compiled ELF launcher that drives mayhem/fuzz_gen.py; Atheris
+# instruments the qrcode library so the run records coverage (edges).
+# Target name `make-fuzz` is the historical name from the original integration —
+# kept so prior Mayhem run history stays attached.
+project: savantenvs/python-qrcode
+target: make-fuzz
+
+# Hangs are bounded by the runner, never by the harness: `timeout:` is the per-exec limit
+# (seconds). It is generous on purpose -- a near-capacity payload (up to the harness's 3000-byte
+# cap, i.e. a ~version-40 symbol encoded and rendered twice under Atheris instrumentation)
+# legitimately takes several seconds, most on a fresh process's first input, and training hosts
+# can be much slower than a dev box.
+cmds:
+  - cmd: /mayhem/qrcode_fuzzer
+    libfuzzer: true
+    timeout: 30
